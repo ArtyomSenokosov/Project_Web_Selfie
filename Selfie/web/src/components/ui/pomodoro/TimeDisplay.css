@@ -1,0 +1,35 @@
+.TimeDisplay {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 300px;
+    height: 300px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 2em;
+    color: var(--color-primary);
+    padding: 20px;
+    border-radius: 50%;
+    background-color: var(--color-white);
+    border: 2px solid var(--color-primary);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.TimeDisplay:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+    .TimeDisplay {
+        font-size: 1.5em;
+        width: 100px;
+        height: 100px;
+        padding: 10px;
+    }
+}
+
+.TimeDisplay .inner-circle {
+    background-color: transparent;
+    border: none;
+}
