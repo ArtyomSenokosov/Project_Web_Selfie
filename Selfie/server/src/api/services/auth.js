@@ -69,7 +69,7 @@ export const loginUser = async (req, res) => {
 };
 
 export const renewToken = async (req, res) => {
-    const {id, name} = req;
+    const {id, name} = req.user;
     try {
         const token = await generateJWT(id, name);
         return res.json({
