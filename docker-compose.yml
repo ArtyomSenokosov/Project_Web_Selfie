@@ -1,0 +1,23 @@
+version: '3'
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - BUILD_STAGE=frontend-build
+    volumes:
+      - ./web:/app/web
+    ports:
+      - "3001:3000"
+    command: npm run start
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./server:/app/server
+    ports:
+      - "4000:4000"
+    command: npm start
