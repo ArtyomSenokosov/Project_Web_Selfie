@@ -17,7 +17,7 @@ export const eventExistsById = async (req, res, next) => {
 };
 
 export const isEventOwner = async (req, res, next) => {
-    const userId = req.id;
+    const userId = req.user.id;
     if (!userId) {
         return res.status(500).json({
             ok: false,
