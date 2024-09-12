@@ -24,7 +24,7 @@ export const createEvent = async (req, res) => {
         start,
         end,
         notes,
-        user: req.id,
+        user: req.user.id,
         type,
         frequency: type === 'recurring' ? frequency : undefined,
         status,
