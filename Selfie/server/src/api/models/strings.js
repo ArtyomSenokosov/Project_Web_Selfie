@@ -26,6 +26,16 @@ const strings = {
         updateError: "Failed to update note",
         deleteError: "Failed to delete note",
         authRequired: "User authentication required"
+    },
+    tasks: {
+        databaseError: 'Task database error occurred',
+        taskCreated: 'Task created successfully',
+        taskUpdated: 'Task updated successfully',
+        taskDeleted: 'Task deleted successfully',
+        taskNotFound: 'Task not found',
+        taskOverdue: 'Task is overdue',
+        taskPending: 'Task is still pending',
+        taskCompleted: 'Task marked as completed'
     }
 };
 

@@ -20,12 +20,13 @@ const nowEnd = nowInitial.clone().add(1, "hour");
 const initEvent = {
     title: "",
     notes: "",
+    location: "",
     start: nowInitial.toDate(),
     end: nowEnd.toDate(),
     type: "one-time",
     frequency: "daily",
     status: "pending",
-    duration: "short-term"
+    duration: "short-term",
 };
 
 const CalendarModal = () => {
@@ -36,7 +37,7 @@ const CalendarModal = () => {
     const {activeEvent} = calendar;
 
     const [formValues, setFormValues] = useState(initEvent);
-    const {notes, title, start, end, type, frequency, status, duration} = formValues;
+    const {notes, title, location, start, end, type, frequency, status, duration} = formValues;
 
     useEffect(() => {
         if (activeEvent) {
@@ -45,7 +46,8 @@ const CalendarModal = () => {
                 type: activeEvent.type || "one-time",
                 frequency: activeEvent.frequency || "daily",
                 status: activeEvent.status || "pending",
-                duration: activeEvent.duration || "short-term"
+                duration: activeEvent.duration || "short-term",
+                location: activeEvent.location || "",
             });
         } else {
             setFormValues(initEvent);
@@ -107,6 +109,12 @@ const CalendarModal = () => {
         } else if (notes && notes.trim().length > 128) {
             dispatch(setError("Notes length must be max 128 characters"));
             return false;
+        } else if (location.trim().length === 0) {
+            dispatch(setError("Location is required"));
+            return false;
+        } else if (location.trim().length > 128) {
+            dispatch(setError("Location length must be max 128 characters"));
+            return false;
         } else if (type === 'recurring' && !frequency) {
             dispatch(setError("Frequency is required for recurring events"));
             return false;
@@ -166,6 +174,21 @@ const CalendarModal = () => {
                         name="title"
                         placeholder="New event"
                         value={title}
+                        onChange={handleInputChange}
+                    />
+                </div>
+                <div className="form__field">
+                    <label htmlFor="location" className="form__label">
+                        Location
+                    </label>
+                    <input
+                        autoComplete="off"
+                        type="text"
+                        className="form__input"
+                        id="location"
+                        name="location"
+                        placeholder="Enter location"
+                        value={location}
                         onChange={handleInputChange}
                     />
                 </div>

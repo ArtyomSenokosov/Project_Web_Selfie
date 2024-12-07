@@ -8,6 +8,7 @@ import dbConnection from '../src/api/database/config.js';
 import authRouter from '../src/api/controllers/auth.js';
 import eventsRouter from '../src/api/controllers/events.js';
 import notesRouter from '../src/api/controllers/notes.js';
+import tasksRouter from '../src/api/controllers/tasks.js';
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ dotenv.config();
         app.use('/api/auth', authRouter);
         app.use('/api/events', eventsRouter);
         app.use('/api/notes', notesRouter);
+        app.use('/api/tasks', tasksRouter);
 
         app.get('/*', (req, res) => {
             res.sendFile(path.join(__dirname, 'public', 'index.html'));

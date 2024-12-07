@@ -18,16 +18,19 @@ const uiReducer = (state = initialState, action) => {
                 ...state,
                 msgError: "",
             };
+
         case types.uiOpenModal:
             return {
                 ...state,
                 modalOpen: true,
             };
+
         case types.uiCloseModal:
             return {
                 ...state,
                 modalOpen: false,
             };
+
         default:
             return state;
     }

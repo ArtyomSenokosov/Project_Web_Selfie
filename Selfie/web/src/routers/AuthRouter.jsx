@@ -15,4 +15,5 @@ const AuthRouter = () => {
         </main>
     );
 };
+
 export default AuthRouter;

@@ -17,4 +17,5 @@ const AddNewBtn = () => {
         </button>
     );
 };
+
 export default AddNewBtn;

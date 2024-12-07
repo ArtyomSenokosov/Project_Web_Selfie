@@ -132,4 +132,5 @@ const RegisterScreen = () => {
         </section>
     );
 };
+
 export default RegisterScreen;

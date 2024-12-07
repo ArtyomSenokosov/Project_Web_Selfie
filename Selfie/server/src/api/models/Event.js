@@ -18,6 +18,11 @@ const EventSchema = new Schema({
     notes: {
         type: String,
     },
+    location: {
+        type: String,
+        required: [true, "Location is required"],
+        maxlength: 128,
+    },
     user: {
         type: Schema.Types.ObjectId,
         ref: "User",

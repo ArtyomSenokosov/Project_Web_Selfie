@@ -7,13 +7,13 @@ import {useDispatch, useSelector} from "react-redux";
 import {useEffect} from "react";
 import {startChecking} from "../actions/auth";
 import LoadingScreen from "../components/ui/LoadingScreen";
+import GlobalNotifications from "../components/ui/GlobalNotifications";
 
 import HomePage from '../components/home/HomeScreen';
 import Pomodoro from '../components/pomodoro/Pomodoro.jsx';
 import Profile from '../components/profile/ProfilePage.jsx';
-import {AddNotePage} from '../components/note/AddNotePage';
 import {NotesListPage} from '../components/note/NotesListPage';
-import {EditNotePage} from '../components/note/EditNotePage';
+import TasksListPage from "../components/tasks/TasksListPage";
 
 const AppRouter = () => {
     const dispatch = useDispatch();
@@ -30,6 +30,7 @@ const AppRouter = () => {
 
     return (
         <Router>
+            <GlobalNotifications/>
             <Routes>
                 <Route
                     path="/*"
@@ -64,22 +65,6 @@ const AppRouter = () => {
                     }
                 />
                 <Route
-                    path="/notes/add"
-                    element={
-                        <PrivateRoute isAuth={!!id}>
-                            <AddNotePage/>
-                        </PrivateRoute>
-                    }
-                />
-                <Route
-                    path="/notes/edit/:id"
-                    element={
-                        <PrivateRoute isAuth={!!id}>
-                            <EditNotePage/>
-                        </PrivateRoute>
-                    }
-                />
-                <Route
                     path="/pomodoro"
                     element={
                         <PrivateRoute isAuth={!!id}>
@@ -92,6 +77,14 @@ const AppRouter = () => {
                     element={
                         <PrivateRoute isAuth={!!id}>
                             <Profile/>
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/tasks"
+                    element={
+                        <PrivateRoute isAuth={!!id}>
+                            <TasksListPage/>
                         </PrivateRoute>
                     }
                 />

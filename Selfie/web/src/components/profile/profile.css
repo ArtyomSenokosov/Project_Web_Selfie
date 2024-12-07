@@ -63,3 +63,16 @@ button[type="submit"]:hover {
     margin-bottom: 20px;
     text-align: center;
 }
+
+.avatar-preview {
+    margin-top: 16px;
+    text-align: center;
+}
+
+.avatar-preview img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ddd;
+}

@@ -13,7 +13,10 @@ export const getNotes = async (req, res) => {
 export const getNotesByTitle = async (req, res) => {
     try {
         const {title} = req.params;
-        const notes = await Note.find({title: {$regex: title, $options: "i"}, user: req.user.id});
+        const notes = await Note.find({
+            title: {$regex: title, $options: "i"},
+            user: req.user.id,
+        });
         res.json({ok: true, notes});
     } catch (error) {
         res.status(500).json({ok: false, msg: strings.notes.fetchError});
@@ -25,8 +28,13 @@ export const createNote = async (req, res) => {
         return res.status(401).json({ok: false, msg: strings.notes.authRequired});
     }
 
-    const {title, text} = req.body;
-    const note = new Note({title, text, user: req.user.id});
+    const {title, text, categories} = req.body;
+    const note = new Note({
+        title,
+        text,
+        categories,
+        user: req.user.id,
+    });
 
     try {
         await note.save();
@@ -38,10 +46,14 @@ export const createNote = async (req, res) => {
 
 export const updateNote = async (req, res) => {
     const {id} = req.params;
-    const {title, text} = req.body;
+    const {title, text, categories} = req.body;
 
     try {
-        const note = await Note.findByIdAndUpdate(id, {title, text}, {new: true});
+        const note = await Note.findByIdAndUpdate(
+            id,
+            {title, text, categories},
+            {new: true}
+        );
         if (!note) {
             return res.status(404).json({ok: false, msg: strings.notes.noteNotFound});
         }

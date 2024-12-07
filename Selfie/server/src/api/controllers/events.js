@@ -21,6 +21,8 @@ router.post(
         body("end", "End date is required").custom(isDate),
         body("end", "End date must be after start date").custom((end, {req}) => isDateAfter(end, req.body.start)),
         body("notes", "Notes must be maximum 128 characters long").optional().isLength({max: 128}),
+        body("location", "Location is required").not().isEmpty(),
+        body("location", "Location must be maximum 128 characters long").isLength({max: 128}),
         validateFields
     ],
     createEvent
@@ -35,6 +37,8 @@ router.put(
         body("start", "Start date is required").custom(isDate),
         body("end", "End date is required").custom(isDate),
         body("notes", "Notes must be maximum 128 characters long").optional().isLength({max: 128}),
+        body("location", "Location is required").not().isEmpty(),
+        body("location", "Location must be maximum 128 characters long").isLength({max: 128}),
         validateFields,
         eventExistsById,
         isEventOwner

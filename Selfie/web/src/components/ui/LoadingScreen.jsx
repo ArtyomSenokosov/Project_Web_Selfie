@@ -3,4 +3,5 @@ const LoadingScreen = () => {
         <>Loading...</>
     )
 }
+
 export default LoadingScreen

@@ -1,5 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Commissioner&family=League+Spartan&display=swap'); /* Normalize */
+@import url('https://fonts.googleapis.com/css2?family=Commissioner&family=League+Spartan&display=swap');
 
+/* Resetting and normalizing styles */
 html {
     line-height: 1.15;
     -webkit-text-size-adjust: 100%;
@@ -179,8 +180,7 @@ template {
     display: none;
 }
 
-/* Index */
-
+/* Custom variables for consistent theming */
 :root {
     --color-primary: #d32f2f;
     --color-valid: #198754;

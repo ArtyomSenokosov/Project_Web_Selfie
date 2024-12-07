@@ -2,7 +2,10 @@ import types from "../types";
 
 const initialState = {
     events: [],
+    tasks: [],
     activeEvent: null,
+    activeTask: null,
+    currentUserId: null,
 };
 
 const calendarReducer = (state = initialState, action) => {
@@ -10,13 +13,23 @@ const calendarReducer = (state = initialState, action) => {
         case types.eventLoaded:
             return {
                 ...state,
-                events: [...action.payload],
+                events: action.payload.filter(
+                    (event) => event.user?._id === state.currentUserId
+                ),
             };
+
+        case types.setCurrentUserId:
+            return {
+                ...state,
+                currentUserId: action.payload,
+            };
+
 
         case types.eventSetActive:
             return {
                 ...state,
                 activeEvent: action.payload,
+                activeTask: null,
             };
 
         case types.eventClearActive:

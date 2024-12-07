@@ -1,62 +1,145 @@
 import {fetchWithToken} from '../helpers/fetch';
-import {ADD_NOTE, DELETE_NOTE, SET_NOTES, UPDATE_NOTE} from '../reducers/notesReducer';
-
-const setNotes = (notes) => ({
-    type: SET_NOTES,
-    payload: notes
-});
-
-const addNote = (note) => ({
-    type: ADD_NOTE,
-    payload: note
-});
+import types from '../types';
+import Swal from 'sweetalert2';
 
 export const startLoadingNotes = () => async (dispatch) => {
-    const resp = await fetchWithToken('notes');
-    const body = await resp.json();
-    if (body.ok) {
-        dispatch(setNotes(body.notes));
-    } else {
-        throw new Error(body.msg || 'Failed to load notes');
-    }
-};
-
-export const startCreatingNote = (note) => async (dispatch) => {
-    const resp = await fetchWithToken('notes', note, 'POST');
-    const body = await resp.json();
-    if (body.ok) {
-        dispatch(addNote(body.note));
-    } else {
-        throw new Error(body.msg || 'Failed to create note');
-    }
-};
-
-export const startDeletingNote = (id) => async (dispatch) => {
     try {
-        const response = await fetchWithToken(`notes/${id}`, {}, 'DELETE');
-        if (response.ok) {
-            dispatch({type: DELETE_NOTE, payload: id});
-            return Promise.resolve();
+        const resp = await fetchWithToken('notes');
+        const body = await resp.json();
+        if (body.ok) {
+            dispatch(loadNotes(body.notes));
         } else {
-            const errorData = await response.json();
-            return Promise.reject(new Error(errorData.msg || 'Failed to delete note'));
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: body.msg || 'Failed to load notes.',
+            });
         }
     } catch (error) {
-        return Promise.reject(error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message,
+        });
     }
 };
+
+export const loadNotes = (notes) => ({
+    type: types.notesLoad,
+    payload: notes,
+});
+
+export const startCreatingNote = (note) => async (dispatch) => {
+    try {
+        const resp = await fetchWithToken('notes', note, 'POST');
+        const body = await resp.json();
+        if (body.ok) {
+            dispatch(addNote(body.note));
+            Swal.fire({
+                icon: 'success',
+                title: 'Note Added',
+                text: `'${body.note.title}' has been added successfully.`,
+                timer: 3000,
+                timerProgressBar: true,
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: body.msg || 'Failed to add the note.',
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message,
+        });
+    }
+};
+
+export const addNote = (note) => ({
+    type: types.notesAddNew,
+    payload: note,
+});
 
 export const startSavingNote = (note) => async (dispatch) => {
     try {
-        const response = await fetchWithToken(`notes/${note.id}`, note, 'PUT');
-        const data = await response.json();
-        if (data.ok) {
-            dispatch({type: UPDATE_NOTE, payload: data.note});
+        const resp = await fetchWithToken(`notes/${note._id}`, note, 'PUT');
+        const body = await resp.json();
+
+        if (body.ok) {
+            dispatch(updateNote(body.note));
+            Swal.fire({
+                icon: 'success',
+                title: 'Note Updated',
+                text: `'${body.note.title}' has been updated successfully.`,
+                timer: 3000,
+                timerProgressBar: true,
+            });
         } else {
-            throw new Error(data.msg || 'Failed to update note');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: body.msg || 'Failed to update the note.',
+            });
         }
     } catch (error) {
-        console.error('Error updating note:', error);
-        throw error;
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message,
+        });
     }
 };
+
+export const updateNote = (note) => ({
+    type: types.notesUpdated,
+    payload: note,
+});
+
+export const startDeletingNote = (id) => async (dispatch) => {
+    const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: "This action cannot be undone!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!',
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const resp = await fetchWithToken(`notes/${id}`, {}, 'DELETE');
+            const body = await resp.json();
+            if (body.ok) {
+                dispatch(deleteNote(id));
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Note Deleted',
+                    text: 'The note has been deleted successfully.',
+                    timer: 3000,
+                    timerProgressBar: true,
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: body.msg || 'Failed to delete the note.',
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message,
+            });
+        }
+    }
+};
+
+export const deleteNote = (id) => ({
+    type: types.notesDelete,
+    payload: id,
+});

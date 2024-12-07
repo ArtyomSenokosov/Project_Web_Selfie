@@ -1,11 +1,11 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const {Schema, model} = mongoose;
 
 const UserSchema = new Schema({
     name: {
         type: String,
-        required: [true, "Name is required"]
+        required: [true, "Name is required"],
     },
     email: {
         type: String,
@@ -15,37 +15,43 @@ const UserSchema = new Schema({
     },
     password: {
         type: String,
-        required: [true, "Password is required"]
+        required: [true, "Password is required"],
     },
     firstName: {
         type: String,
-        default: ""
+        default: "",
     },
     lastName: {
         type: String,
-        default: ""
+        default: "",
     },
     birthDate: {
         type: Date,
-        default: null
-    }
+        default: null,
+    },
 }, {
     toJSON: {
-        transform: documentToJson
+        transform: documentToJson,
     },
-    toObject: {}
+    toObject: {},
 });
 
 UserSchema.virtual('notes', {
     ref: 'Note',
     localField: '_id',
-    foreignField: 'user'
+    foreignField: 'user',
 });
 
 UserSchema.virtual('events', {
     ref: 'Event',
     localField: '_id',
-    foreignField: 'owner'
+    foreignField: 'owner',
+});
+
+UserSchema.virtual('tasks', {
+    ref: 'Task',
+    localField: '_id',
+    foreignField: 'user',
 });
 
 function documentToJson(doc, ret) {

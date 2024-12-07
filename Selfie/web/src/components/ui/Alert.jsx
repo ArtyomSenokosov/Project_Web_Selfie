@@ -11,4 +11,5 @@ Alert.propTypes = {
     type: PropTypes.string,
     description: PropTypes.string,
 };
+
 export default Alert;

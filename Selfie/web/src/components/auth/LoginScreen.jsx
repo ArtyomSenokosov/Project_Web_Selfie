@@ -85,4 +85,5 @@ const LoginScreen = () => {
         </section>
     );
 };
+
 export default LoginScreen;

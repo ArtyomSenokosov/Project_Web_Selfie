@@ -8,6 +8,7 @@ import CalendarEvent from "./CalendarEvent";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./calendar.css";
 import CalendarModal from "./CalendarModal";
+import TaskModal from "../tasks/TaskModal";
 import {useDispatch, useSelector} from "react-redux";
 import {uiOpenModal} from "../../actions/ui";
 import {
@@ -15,57 +16,101 @@ import {
     eventSetActive,
     eventStartLoading,
 } from "../../actions/event";
+import {
+    fetchTasks,
+    setActiveTask,
+    tasksClearActive,
+    startDeletingTask,
+} from "../../actions/tasks";
 import AddNewBtn from "../ui/AddNewBtn";
 import DeleteBtn from "../ui/DeleteBtn";
 
 const localizer = momentLocalizer(moment);
 
-const getNextOccurrences = (event, fromDate, count = 2) => {
+const getNextOccurrences = (event, fromDate, count = 5) => {
     const occurrences = [];
-    let currentDate = moment(fromDate);
+    let currentDate = moment(event.start);
 
-    while (occurrences.length < count) {
-        if (event.frequency === 'daily') {
-            currentDate.add(1, 'day');
-        } else if (event.frequency === 'weekly') {
-            currentDate.add(1, 'week');
-        } else if (event.frequency === 'monthly') {
-            currentDate.add(1, 'month');
-        } else if (event.frequency === 'yearly') {
-            currentDate.add(1, 'year');
-        }
+    while (currentDate.isBefore(fromDate, "day")) {
+        occurrences.push({
+            ...event,
+            start: currentDate.toDate(),
+            end: moment(currentDate)
+                .add(moment(event.end).diff(event.start))
+                .toDate(),
+        });
 
-        if (currentDate.isAfter(fromDate)) {
-            occurrences.push({
-                ...event,
-                start: currentDate.toDate(),
-                end: moment(currentDate).add(moment(event.end).diff(event.start)).toDate(),
-            });
+        if (event.frequency === "daily") {
+            currentDate.add(1, "day");
+        } else if (event.frequency === "weekly") {
+            currentDate.add(1, "week");
+        } else if (event.frequency === "monthly") {
+            currentDate.add(1, "month");
+        } else if (event.frequency === "yearly") {
+            currentDate.add(1, "year");
         }
     }
+
+    for (let i = 0; i < count; i++) {
+        occurrences.push({
+            ...event,
+            start: currentDate.toDate(),
+            end: moment(currentDate)
+                .add(moment(event.end).diff(event.start))
+                .toDate(),
+        });
+
+        if (event.frequency === "daily") {
+            currentDate.add(1, "day");
+        } else if (event.frequency === "weekly") {
+            currentDate.add(1, "week");
+        } else if (event.frequency === "monthly") {
+            currentDate.add(1, "month");
+        } else if (event.frequency === "yearly") {
+            currentDate.add(1, "year");
+        }
+    }
+
     return occurrences;
 };
 
 const CalendarScreen = () => {
     const dispatch = useDispatch();
-    const {calendar, auth, ui} = useSelector((state) => state);
+    const {calendar, auth, tasks} = useSelector((state) => state);
     const {events, activeEvent} = calendar;
     const {id} = auth;
-    const {modalOpen} = ui;
+    const {tasks: tasksList = [], activeTask} = tasks;
     const [lastView, setLastView] = useState(
         localStorage.getItem("lastView") || "month"
     );
+    const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
 
     useEffect(() => {
         dispatch(eventStartLoading());
+        dispatch(fetchTasks());
     }, [dispatch]);
 
     const onDoubleClick = (e) => {
-        dispatch(uiOpenModal());
+        if (e.resource?.type === "task") {
+            const task = tasksList.find((task) => task._id === e.resource.id);
+            if (task) {
+                dispatch(setActiveTask(task));
+                setIsTaskModalOpen(true);
+            }
+        } else {
+            dispatch(uiOpenModal());
+        }
     };
 
     const onSelect = (e) => {
-        dispatch(eventSetActive(e));
+        if (e.resource?.type === "task") {
+            const task = tasksList.find((task) => task._id === e.resource.id);
+            if (task) {
+                dispatch(setActiveTask(task));
+            }
+        } else {
+            dispatch(eventSetActive(e));
+        }
     };
 
     const onViewChange = (e) => {
@@ -88,14 +133,35 @@ const CalendarScreen = () => {
         }
     };
 
+    const onDelete = () => {
+        if (activeTask) {
+            dispatch(startDeletingTask(activeTask._id));
+            dispatch(tasksClearActive());
+        } else if (activeEvent) {
+            if (activeEvent.id) {
+                dispatch(eventClearActive());
+            }
+        }
+    };
+
     const eventStyleGetter = (event) => {
         let backgroundColor = "#465660";
-        if (event.user && event.user._id && id === event.user._id) {
-            backgroundColor = event.status === 'completed' ? "green" : "#367CF7";
+        if (event.resource?.type === "task") {
+            backgroundColor =
+                activeTask && activeTask._id === event.resource.id
+                    ? "#ffa726"
+                    : "#ffc107";
+        } else if (event.type === "recurring") {
+            backgroundColor = "#4caf50";
+        } else if (event.type === "one-time") {
+            backgroundColor = "#f44336";
+        }
+        if (event.status === "completed") {
+            backgroundColor = "green";
         }
 
         const style = {
-            backgroundColor: backgroundColor,
+            backgroundColor,
             opacity: 0.8,
             display: "block",
             color: "white",
@@ -104,13 +170,32 @@ const CalendarScreen = () => {
         return {style};
     };
 
-    const userEvents = events.filter(event => event.user && event.user._id && event.user._id === id);
-    const processedEvents = userEvents.flatMap(event => {
-        if (event.type === 'recurring') {
-            return getNextOccurrences(event, moment(), 2);
-        }
-        return event;
-    });
+    const userEvents = events.filter(
+        (event) => event.user && event.user._id && event.user._id === id
+    );
+
+    const processedEvents = [
+        ...userEvents.flatMap((event) => {
+            if (event.type === "recurring") {
+                return getNextOccurrences(event, moment(), 5);
+            }
+            return event;
+        }),
+        ...(tasksList.length > 0
+            ? tasksList.map((task) => ({
+                title: task.title,
+                start: new Date(task.dueDate),
+                end: new Date(task.dueDate),
+                allDay: true,
+                resource: {type: "task", id: task._id},
+            }))
+            : []),
+    ];
+
+    const closeTaskModal = () => {
+        setIsTaskModalOpen(false);
+        dispatch(tasksClearActive());
+    };
 
     return (
         <div className="calendar">
@@ -126,15 +211,23 @@ const CalendarScreen = () => {
                     onSelectEvent={onSelect}
                     onView={onViewChange}
                     onSelectSlot={onSelectSlot}
-                    selectable={true}
+                    selectable
                     view={lastView}
                     components={{event: CalendarEvent}}
                 />
             </div>
-            {activeEvent && !modalOpen && <DeleteBtn/>}
+            {(activeEvent || activeTask) && <DeleteBtn onClick={onDelete}/>}
             <AddNewBtn/>
             <CalendarModal/>
+            {isTaskModalOpen && activeTask && (
+                <TaskModal
+                    isOpen={isTaskModalOpen}
+                    onClose={closeTaskModal}
+                    task={activeTask}
+                />
+            )}
         </div>
     );
 };
+
 export default CalendarScreen;
